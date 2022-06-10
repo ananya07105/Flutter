@@ -1,4 +1,10 @@
+import 'dart:ui';
+
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:myapp/services/sqlite_service.dart';
+
+import 'Contacts.dart';
 
 void main() => runApp(const MyApp());
 
@@ -65,6 +71,26 @@ class MyStatefulWidget extends StatefulWidget {
 class _MyStatefulWidgetState extends State<MyStatefulWidget> {
   String areadropdown = 'Area';
   String statedropdown = 'State';
+  TextEditingController nameController = TextEditingController();
+  TextEditingController phoneController = TextEditingController();
+  TextEditingController addressController = TextEditingController();
+  TextEditingController cityController = TextEditingController();
+  TextEditingController zipController = TextEditingController();
+  TextEditingController emailController = TextEditingController();
+  TextEditingController dobController = TextEditingController();
+
+
+
+  late SqliteService _db;
+  @override
+  void initState() {
+    super.initState();
+    _db= SqliteService();
+    this._db.initializeDB().whenComplete(() {
+      print("database has been initialized");
+    });
+
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -74,6 +100,7 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
         Padding(
           padding: const EdgeInsets.only(left: 10.0,top: 30.0,right: 20.0),
           child: TextFormField(
+            controller: nameController,
             decoration: const InputDecoration(
               filled: true,
               fillColor: Colors.black12,
@@ -93,6 +120,7 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
               Padding(
                 padding: const EdgeInsets.only(top: 20.0, left: 10.0 ),
                 child: TextFormField(
+                  controller: phoneController,
                   decoration: const InputDecoration(
                     filled: true,
                     fillColor: Colors.black12,
@@ -101,6 +129,8 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
                     hintText: 'Enter a phone number',
                     labelText: 'Phone',
                   ),
+                  keyboardType: TextInputType.number,
+                  inputFormatters: [FilteringTextInputFormatter.digitsOnly],
                 ),
               ),
             ),
@@ -143,6 +173,7 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
         Padding(
           padding: const EdgeInsets.only( top : 20.0, right: 20.0, left: 10.0),
           child: TextFormField(
+            controller: addressController,
             decoration: const InputDecoration(
               filled: true,
               fillColor: Colors.black12,
@@ -156,6 +187,7 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
         Padding(
           padding: const EdgeInsets.only(top: 20.0,left: 50.0, right: 20.0, bottom: 20.0),
           child: TextFormField(
+            controller: cityController,
             decoration: const InputDecoration(
               filled: true,
               fillColor: Colors.black12,
@@ -208,6 +240,7 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
               Padding(
                 padding: const EdgeInsets.only(right: 20.0),
                 child: TextFormField(
+                  controller: zipController,
                   decoration: const InputDecoration(
                     filled: true,
                     fillColor: Colors.black12,
@@ -215,6 +248,8 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
                     hintText: 'Enter zip code',
                     labelText: 'Zip',
                   ),
+                  keyboardType: TextInputType.number,
+                  inputFormatters: [FilteringTextInputFormatter.digitsOnly],
                 ),
               ),
             ),
@@ -225,6 +260,7 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
         Padding(
           padding: const EdgeInsets.only(left: 10.0,top: 20.0,bottom: 20.0, right: 20.0),
           child: TextFormField(
+            controller: emailController,
             decoration: const InputDecoration(
               filled: true,
               fillColor: Colors.black12,
@@ -238,6 +274,7 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
         Padding(
           padding: const EdgeInsets.only(left:10.0, bottom: 20.0,right: 20.0),
           child: TextFormField(
+            controller: dobController,
             decoration: const InputDecoration(
               filled: true,
               fillColor: Colors.black12,
@@ -248,11 +285,29 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
             ),
           ),
         ),
-        new Container(
+        Container(
             padding: const EdgeInsets.only(left: 150.0, top: 40.0, right: 150.0),
-            child: new RaisedButton(
+            child: ElevatedButton(
               child: const Text('Submit'),
-              onPressed: null,
+              onPressed:(){
+                Contacts contact = Contacts();
+                contact.name = nameController.text ?? "";
+                print(nameController.text);
+                contact.phone = (phoneController.text??"") ;
+                print(phoneController.text);
+                contact.address=addressController.text??"";
+                print(addressController.text);
+                contact.city=cityController.text??"";
+                print(cityController.text);
+                contact.zip = int.parse(zipController.text??"");
+                print(zipController.text);
+                contact.email = emailController.text??"";
+                print(emailController.text);
+                contact.dob = (dobController.text??"");
+                print(dobController.text);
+                _db.createItem(contact);
+
+              }
             )),
       ],
     );
